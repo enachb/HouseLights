@@ -9,6 +9,8 @@
 
 #include "FastSPI_LED2.h"
 #include "SerialCommand.h"
+#include <NilRTOS.h>
+
 //#include "xmas.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,18 +20,66 @@
 //////////////////////////////////////////////////
 
 #define NUM_LEDS 150
+#define LED_PIN 13
 
 CRGB leds[NUM_LEDS];
 SerialCommand SCmd;  
 boolean stop = false;
 
 void setup() {
+  nilSysBegin();
+
   // sanity check delay - allows reprogramming if accidently blowing power w/leds
   //  delay(2000);
   FastLED.addLeds<TM1809, 7, BRG>(leds, NUM_LEDS);
   LEDS.setBrightness(255);
 
   Serial.begin(9600); 
+
+}
+
+NIL_WORKING_AREA(waThread1, 16);
+NIL_WORKING_AREA(waThread2, 16);
+NIL_WORKING_AREA(waThread3, 16);
+
+void loop() { 
+
+  //  LEDS.showColor(CRGB::Purple);
+  //  LEDS.showColor(CRGB(255,255,255));
+
+}
+
+
+// Declare thread function for thread 1.
+NIL_THREAD(Thread1, arg) {
+  sineEffect(50,10);
+}
+
+
+// Declare thread function for thread 1.
+NIL_THREAD(Thread2, arg) {
+
+  pinMode(LED_PIN, OUTPUT);
+
+  // Flash led every 200 ms.
+  while (TRUE) {
+
+    // Turn LED on.
+    digitalWrite(LED_PIN, HIGH);
+
+    // Sleep for 50 milliseconds.
+    nilThdSleepMilliseconds(50);
+
+    // Turn LED off.
+    digitalWrite(LED_PIN, LOW);
+
+    // Sleep for 150 milliseconds.
+    nilThdSleepMilliseconds(150);
+  }
+}
+
+// Declare thread function for thread 1.
+NIL_THREAD(Thread3, arg) {
 
   // Setup callbacks for SerialCommand commands 
   SCmd.addCommand("ALLON",allOn);       // Turns all lights on to given color
@@ -38,45 +88,21 @@ void setup() {
   SCmd.addCommand("STOP",stopIt);       // Turns all lights on to given color
   SCmd.addCommand("RIDER",rider);       // Turns all lights on to given color
 
-    Serial.println("Init done!"); 
+    Serial.println("Init done!");
+
+  while(true){
+    SCmd.readSerial(); 
+    nilThdSleepMilliseconds(500);
+//    Serial.println("ping!");    
+  }  
 
 }
 
-void loop() { 
-  //  LEDS.showColor(CRGB::Purple);
-  //  LEDS.showColor(CRGB(255,255,255));
-
-  SCmd.readSerial(); 
-
-  sineEffect(50,100);
-//  fuse();
-
-}
-
-void stopIt(){
-  stop = true;
-  Serial.println("Stopping..."); 
-}
-
-void flicker(uint8_t number){
-
-  CRGB ledsPrev[NUM_LEDS];
-  memcpy(leds,ledsPrev,sizeof(leds) * sizeof(CRGB));
-
-  const uint8_t MAX = 50;
-
-  leds[1].fadeLightBy( 100 );
-  LEDS.show();
-  //  memcpy(ledsPrev,leds,sizeof(leds) * sizeof(CRGB));
-
-}
-
-uint32_t dimColor(uint32_t color, uint8_t width) {
-  return (((color&0xFF0000)/width)&0xFF0000) + (((color&0x00FF00)/width)&0x00FF00) + (((color&0x0000FF)/width)&0x0000FF);
-}
-
-
-
+NIL_THREADS_TABLE_BEGIN()
+NIL_THREADS_TABLE_ENTRY("thread1", Thread1, NULL, waThread1, sizeof(waThread1))
+//NIL_THREADS_TABLE_ENTRY("thread2", Thread2, NULL, waThread2, sizeof(waThread2))
+NIL_THREADS_TABLE_ENTRY("thread3", Thread3, NULL, waThread2, sizeof(waThread3))
+NIL_THREADS_TABLE_END()
 
 
 

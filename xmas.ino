@@ -1,10 +1,10 @@
 
+
 float ct=0, t=0, rate;
 int k,j, r;
 
 void sineEffect(uint8_t brightness, uint8_t sleep){
 
-  FastSPI_LED.setBrightness(brightness);
 
   while(true){
     rate = 30+27*sin(t/10);
@@ -20,8 +20,9 @@ void sineEffect(uint8_t brightness, uint8_t sleep){
 
     t += 0.05;
     //  j+=0.1;
+    FastSPI_LED.setBrightness(brightness);
     FastSPI_LED.show();
-    delay(sleep);
+    nilThdSleepMilliseconds(sleep);
   }
 }
 
@@ -43,4 +44,5 @@ void xmas(){
   Serial.println("XMas done!"); 
 
 }
+
 
