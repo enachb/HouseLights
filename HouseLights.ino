@@ -36,9 +36,19 @@ void setup() {
 
   Serial.begin(9600); 
 
+  // Setup callbacks for SerialCommand commands 
+  SCmd.addCommand("ALLON",allOn);       // Turns all lights on to given color
+  SCmd.addCommand("ALLOFF",allOff);       // Turns all lights on to given color
+  SCmd.addCommand("XMAS",xmas);       // Turns all lights on to given color
+  SCmd.addCommand("STOP",stopIt);       // Turns all lights on to given color
+  SCmd.addCommand("RIDER",rider);       // Turns all lights on to given color
+  SCmd.addCommand("PING",ping);       // Turns all lights on to given color
+
+    Serial.println("Init done!");
+
 }
 
-NIL_WORKING_AREA(waThread1, 16);
+NIL_WORKING_AREA(waThread1, 512);
 NIL_WORKING_AREA(waThread2, 16);
 NIL_WORKING_AREA(waThread3, 16);
 
@@ -47,12 +57,22 @@ void loop() {
   //  LEDS.showColor(CRGB::Purple);
   //  LEDS.showColor(CRGB(255,255,255));
 
+    SCmd.readSerial(); 
+
 }
 
 
 // Declare thread function for thread 1.
 NIL_THREAD(Thread1, arg) {
-  sineEffect(50,10);
+  sineEffect(200,50);
+
+// while(true){
+//    knightRider(1, 100, 2, 0x440000); // Cycles, Speed, Width, RGB Color (purple);
+//    knightRider(1, 100, 2, 0x004400); // Cycles, Speed, Width, RGB Color (purple);
+//    knightRider(1, 100, 2, 0x000044); // Cycles, Speed, Width, RGB Color (purple);
+//    knightRider(1, 100, 2, 0x444444); // Cycles, Speed, Width, RGB Color (purple);
+//  }
+
 }
 
 
@@ -81,19 +101,8 @@ NIL_THREAD(Thread2, arg) {
 // Declare thread function for thread 1.
 NIL_THREAD(Thread3, arg) {
 
-  // Setup callbacks for SerialCommand commands 
-  SCmd.addCommand("ALLON",allOn);       // Turns all lights on to given color
-  SCmd.addCommand("ALLOFF",allOff);       // Turns all lights on to given color
-  SCmd.addCommand("XMAS",xmas);       // Turns all lights on to given color
-  SCmd.addCommand("STOP",stopIt);       // Turns all lights on to given color
-  SCmd.addCommand("RIDER",rider);       // Turns all lights on to given color
-
-    Serial.println("Init done!");
-
   while(true){
-    SCmd.readSerial(); 
     nilThdSleepMilliseconds(500);
-//    Serial.println("ping!");    
   }  
 
 }
@@ -105,6 +114,9 @@ NIL_THREADS_TABLE_ENTRY("thread3", Thread3, NULL, waThread2, sizeof(waThread3))
 NIL_THREADS_TABLE_END()
 
 
+void ping(){
+    Serial.println("Pong!");  
+}
 
 
 

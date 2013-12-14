@@ -30,8 +30,7 @@ void rider(){
   }
 
   while(!stop){
-    knightRider(1, 32, 2, CRGB(r,g,b)); // Cycles, Speed, Width, RGB Color (purple);
-    SCmd.readSerial();     
+    knightRider(1, 32, 2, 0xFFFFFF); // Cycles, Speed, Width, RGB Color (purple);
   }
 
   Serial.println("Rider done!"); 
@@ -44,26 +43,27 @@ void knightRider(uint16_t cycles, uint16_t speed, uint8_t width, uint32_t color)
   for(int i = 0; i < cycles; i++){
     for (int count = 1; count<NUM_LEDS; count++) {
       leds[count] = color; 
-      LEDS.show();
-      delay(speed);
+      nilThdSleepMilliseconds(speed);
       old_val[count] = color;
       for(int x = count; x>0; x--) {
         old_val[x-1] = dimColor(old_val[x-1], width);
         leds[x-1] = old_val[x-1]; 
-        LEDS.show();
       }
+      LEDS.show();
     }
     for (int count = NUM_LEDS-1; count>=0; count--) {
       leds[count] = color; 
-      LEDS.show();
-      delay(speed);
+      nilThdSleepMilliseconds(speed);
       old_val[count] = color;
       for(int x = count; x<=NUM_LEDS ;x++) {
         old_val[x-1] = dimColor(old_val[x-1], width);
         leds[x+1]=old_val[x+1]; 
-        LEDS.show();
       }
+      LEDS.show();
     }
   }
 }
+
+
+
 
